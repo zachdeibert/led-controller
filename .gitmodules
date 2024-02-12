@@ -1,3 +1,6 @@
+[submodule "module/core"]
+	path = module/core
+	url = ../core.git
 [submodule "module/pico-core"]
 	path = module/pico-core
 	url = ../pico-core.git
