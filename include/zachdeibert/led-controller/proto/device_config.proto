@@ -1,0 +1,6 @@
+syntax = "proto3";
+package zachdeibert.led_controller.proto;
+
+message device_config {
+    uint32 test = 1;
+}
