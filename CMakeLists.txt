@@ -1,5 +1,7 @@
 find_package(Nanopb REQUIRED COMPONENTS cpp-descriptors)
 
+add_subdirectory(module/pico-core)
+
 nanopb_generate_cpp(
     TARGET led_controller_proto
     RELPATH include
