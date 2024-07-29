@@ -1,0 +1,83 @@
+body > nav {
+    color: var(--md-sys-color-on-secondary-container);
+}
+
+body > nav > .nav-wrapper {
+    display: flex;
+}
+
+body > nav > .nav-wrapper > ul {
+    padding: 0;
+}
+
+body > nav > .nav-wrapper > ul > li > a {
+    color: var(--md-sys-color-on-secondary-container);
+}
+
+body > nav > .nav-wrapper > div {
+    height: calc(100% - 4px);
+    line-height: calc(var(--navbar-height) - 4px);
+    padding: 2px 10px;
+}
+
+body > nav > .nav-wrapper > .input-field {
+    flex-grow: 1;
+}
+
+body > nav > .nav-wrapper > .input-field > input {
+    background-color: var(--md-sys-color-secondary-container);
+}
+
+body > nav > .nav-wrapper > .editor-resource-stats {
+    line-height: calc(var(--navbar-height) / 2 - 2px);
+    width: 200px;
+}
+
+body > main {
+    height: calc(100vh - var(--navbar-height));
+    overflow: hidden;
+    position: relative;
+}
+
+body > main > #editor-content {
+    background-image:
+        linear-gradient(to right, var(--md-sys-color-on-background) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--md-sys-color-on-background) 1px, transparent 1px);
+    background-size: 50px 50px;
+    content: " ";
+    height: 150%;
+    opacity: 0.1;
+    position: absolute;
+    width: 150%;
+}
+
+body > main > #editor-content:before {
+    background-image:
+        linear-gradient(to right, var(--md-sys-color-on-background) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--md-sys-color-on-background) 1px, transparent 1px);
+    background-size: 10px 10px;
+    content: " ";
+    height: 100%;
+    opacity: 0.3;
+    position: absolute;
+    width: 100%;
+}
+
+body > #editor-add-menu {
+    width: 500px;
+}
+
+body > .fixed-action-btn > .btn-floating > i {
+    color: var(--md-sys-color-on-primary-container);
+}
+
+body > ul.sidenav > li > .collapsible-header {
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    font-weight: bold;
+}
+
+body > ul.sidenav > li > .collapsible-body > .collapsible-item {
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    line-height: 1.5;
+    padding: 1rem 2rem;
+}

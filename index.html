@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="application-name" content="LED Controller Configuration" />
+        <meta name="author" content="Zach Deibert" />
+        <meta name="description" content="A project to control LEDs for various applications" />
+        <meta name="keywords" content="ARGB, LED, Neopixel, Pico, RGB, WS2811, WS2812" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+        <link href="https://cdn.jsdelivr.net/npm/@materializecss/materialize@2.1.0/dist/css/materialize.min.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+        <link href="src/main.css" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/@materializecss/materialize@2.1.0/dist/js/materialize.min.js"></script>
+        <script src="src/main.js"></script>
+        <title>LED Controller Configuration</title>
+    </head>
+    <body class="mdc-typography">
+        <nav class="z-depth-4">
+            <div class="nav-wrapper">
+                <ul>
+                    <li>
+                        <a class="tooltipped waves-effect" data-position="bottom" data-tooltip="Browse recent files">
+                            <i class="material-symbols-outlined">folder_open</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="tooltipped waves-effect" data-position="bottom" data-tooltip="Upload .uf2 file">
+                            <i class="material-symbols-outlined">file_open</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="tooltipped waves-effect" data-position="bottom" data-tooltip="Download .uf2 file">
+                            <i class="material-symbols-outlined">file_save</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="tooltipped waves-effect" data-position="bottom" data-tooltip="Upload to device">
+                            <i class="material-symbols-outlined">publish</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="tooltipped waves-effect" data-position="bottom" data-tooltip="Redo">
+                            <i class="material-symbols-outlined">redo</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="tooltipped waves-effect" data-position="bottom" data-tooltip="Undo">
+                            <i class="material-symbols-outlined">undo</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="tooltipped waves-effect" data-position="bottom" data-tooltip="Device options">
+                            <i class="material-symbols-outlined">memory</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="tooltipped waves-effect" data-position="bottom" data-tooltip="Edit raw configuration">
+                            <i class="material-symbols-outlined">data_object</i>
+                        </a>
+                    </li>
+                </ul>
+                <div class="input-field outlined">
+                    <input class="center" id="editor-filename" placeholder="LED Controller.uf2" type="text" />
+                </div>
+                <div class="editor-resource-stats">
+                    Flash usage:
+                    <span id="editor-flash-used">0.00</span>/<span id="editor-flash-total">2</span>
+                    MiB
+                    <br />
+                    RAM usage:
+                    <span id="editor-ram-used">0.00</span>/<span id="editor-ram-total">256</span>
+                    KiB
+                </div>
+                <ul>
+                    <li>
+                        <a class="tooltipped waves-effect" data-position="bottom" data-tooltip="Open GitHub repo" href="https://github.com/zachdeibert/led-controller">
+                            <i class="material-symbols-outlined">code</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="tooltipped waves-effect" data-position="bottom" data-tooltip="Help">
+                            <i class="material-symbols-outlined">help</i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <main>
+            <div id="editor-content"></div>
+        </main>
+        <div class="fixed-action-btn">
+            <a class="btn-floating btn-large sidenav-trigger waves-effect" data-target="editor-add-menu">
+                <i class="large material-symbols-outlined">add</i>
+            </a>
+        </div>
+        <ul class="collapsible expandable sidenav" id="editor-add-menu">
+            <li>
+                <div class="collapsible-header waves-effect z-depth-1">
+                    <i class="material-symbols-outlined">lightbulb</i>
+                    LED&nbsp;Outputs
+                </div>
+                <div class="collapsible-body" id="editor-group-led-outputs">
+                    <div class="collapsible-item waves-effect">Generic ARGB</div>
+                    <div class="collapsible-item waves-effect">Generic RGB</div>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header waves-effect z-depth-1">
+                    <i class="material-symbols-outlined">tune</i>
+                    Control&nbsp;Inputs
+                </div>
+                <div class="collapsible-body" id="editor-group-control-inputs">
+                    <div class="collapsible-item waves-effect">Generic ARGB</div>
+                    <div class="collapsible-item waves-effect">Generic RGB</div>
+                    <div class="collapsible-item waves-effect">USB (NZXT HUE+)</div>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header waves-effect z-depth-1">
+                    <i class="material-symbols-outlined">function</i>
+                    Data&nbsp;Processing
+                </div>
+                <div class="collapsible-body" id="editor-group-processing">
+                    <div class="collapsible-item waves-effect">Arbitrary Math</div>
+                    <div class="collapsible-item waves-effect">ARGB Splitter</div>
+                    <div class="collapsible-item waves-effect">Repeater</div>
+                    <div class="collapsible-item waves-effect">RGB to ARGB</div>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header waves-effect z-depth-1">
+                    <i class="material-symbols-outlined">palette</i>
+                    Color&nbsp;Generators
+                </div>
+                <div class="collapsible-body" id="editor-group-generators">
+                    <div class="collapsible-item waves-effect">Alert</div>
+                    <div class="collapsible-item waves-effect">Alternating</div>
+                    <div class="collapsible-item waves-effect">Breathing</div>
+                    <div class="collapsible-item waves-effect">Candlelight</div>
+                    <div class="collapsible-item waves-effect">Cover Marquee</div>
+                    <div class="collapsible-item waves-effect">Fading</div>
+                    <div class="collapsible-item waves-effect">Marquee</div>
+                    <div class="collapsible-item waves-effect">Pulsing</div>
+                    <div class="collapsible-item waves-effect">Solid Color</div>
+                    <div class="collapsible-item waves-effect">Spectrum Cycle</div>
+                    <div class="collapsible-item waves-effect">Wave</div>
+                    <div class="collapsible-item waves-effect">Wings</div>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header waves-effect z-depth-1">
+                    <i class="material-symbols-outlined">construction</i>
+                    Other&nbsp;Utilities
+                </div>
+                <div class="collapsible-body" id="editor-group-utilities">
+                    <div class="collapsible-item waves-effect">Color-Based Updater</div>
+                    <div class="collapsible-item waves-effect">On/Off Timer</div>
+                    <div class="collapsible-item waves-effect">Wi-Fi Updater</div>
+                </div>
+            </li>
+        </ul>
+    </body>
+</html>
