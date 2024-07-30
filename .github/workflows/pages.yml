@@ -1,0 +1,41 @@
+concurrency:
+  cancel-in-progress: false
+  group: "pages"
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Archive artifact
+        run: |
+          echo ::group::Archive artifact
+          find -name "*.css" \
+            -o -name "*.html" \
+            -o -name "*.js" \
+            | tar -cvf "$RUNNER_TEMP/artifact.tar" -T -
+          echo ::endgroup::
+        shell: sh
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "github-pages"
+          if-no-files-found: error
+          path: ${{ runner.temp }}/artifact.tar
+          retention-days: 1
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+name: Deploy configuration app to GitHub Pages
+on:
+  push:
+    branches: ["master"]
+permissions:
+  contents: read
+  id-token: write
+  pages: write
