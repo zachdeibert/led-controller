@@ -18,7 +18,9 @@ jobs:
           find -name "*.css" \
             -o -name "*.html" \
             -o -name "*.js" \
-            | tar -cvf "$RUNNER_TEMP/artifact.tar" -T -
+            | tar \
+              --dereference --hard-dereference \
+              -cvf "$RUNNER_TEMP/artifact.tar" -T -
           echo ::endgroup::
         shell: sh
       - name: Upload artifact
