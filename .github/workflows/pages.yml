@@ -12,22 +12,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Set up GitHub Pages
         uses: actions/configure-pages@v5
-      - name: Archive artifact
-        run: |
-          echo ::group::Archive artifact
-          find -name "*.css" \
-            -o -name "*.html" \
-            -o -name "*.js" \
-            | tar -cvf "$RUNNER_TEMP/artifact.tar" -T -
-          echo ::endgroup::
-        shell: sh
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v2
         with:
-          name: "github-pages"
-          if-no-files-found: error
-          path: ${{ runner.temp }}/artifact.tar
-          retention-days: 1
+          path: "."
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
