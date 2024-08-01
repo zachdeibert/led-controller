@@ -33,34 +33,55 @@ body > nav > .nav-wrapper > .editor-resource-stats {
     width: 200px;
 }
 
-body > main {
+body > #editor-container {
     height: calc(100vh - var(--navbar-height));
     overflow: hidden;
     position: relative;
 }
 
-body > main > #editor-content {
-    background-image:
-        linear-gradient(to right, var(--md-sys-color-on-background) 1px, transparent 1px),
-        linear-gradient(to bottom, var(--md-sys-color-on-background) 1px, transparent 1px);
-    background-size: 50px 50px;
-    content: " ";
-    height: 150%;
-    opacity: 0.1;
+body > #editor-container > .editor-grid-minor {
+    height: calc(100% + 50px);
     position: absolute;
-    width: 150%;
+    width: calc(100% + 50px);
 }
 
-body > main > #editor-content:before {
+body > #editor-container > .editor-grid-minor:before {
     background-image:
         linear-gradient(to right, var(--md-sys-color-on-background) 1px, transparent 1px),
         linear-gradient(to bottom, var(--md-sys-color-on-background) 1px, transparent 1px);
     background-size: 10px 10px;
     content: " ";
     height: 100%;
-    opacity: 0.3;
+    opacity: 0.03;
     position: absolute;
     width: 100%;
+}
+
+body > #editor-container > .editor-grid-minor > .editor-grid-major {
+    height: 100%;
+    width: 100%;
+}
+
+body > #editor-container > .editor-grid-minor > .editor-grid-major:before {
+    background-image:
+        linear-gradient(to right, var(--md-sys-color-on-background) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--md-sys-color-on-background) 1px, transparent 1px);
+    background-size: 50px 50px;
+    content: " ";
+    height: 100%;
+    opacity: 0.1;
+    position: absolute;
+    width: 100%;
+}
+
+body > #editor-container > .editor-grid-minor > .editor-grid-major > #editor-offset {
+    padding-left: calc(round(50vw, 50px) + 0.5px);
+    padding-top: calc(round(50vh, 50px) + 0.5px);
+    position: relative;
+}
+
+body > #editor-container > .editor-grid-minor > .editor-grid-major > #editor-offset > #editor-content {
+    position: relative;
 }
 
 body > #editor-add-menu {
