@@ -264,6 +264,15 @@ class led_controller_block {
         }
 
         /**
+         * @param {string} class_name
+         */
+        add_connector(class_name) {
+            const div = document.createElement("div");
+            div.classList.add("block-connector", class_name);
+            this.#root_element.appendChild(div);
+        }
+
+        /**
          * @param {string} off_label
          * @param {string} on_label
          * @returns {HTMLInputElement}

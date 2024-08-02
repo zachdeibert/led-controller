@@ -21,5 +21,6 @@ led_controller_block.register(class extends led_controller_block {
         });
         this.add_switch("400 kHz", "800 kHz").checked        = true;
         this.add_switch("Active Low", "Active High").checked = true;
+        this.add_connector("connector");
     }
 });

@@ -126,6 +126,13 @@ body > #editor-container > .editor-grid-minor > .editor-grid-major > #editor-off
     margin: 4px 0;
 }
 
+#editor-content > * > .block-connector {
+    background-color: var(--md-sys-color-primary-container);
+    height: 20px;
+    position: absolute;
+    width: 10px;
+}
+
 #editor-content .input-field input {
     background-color: var(--md-sys-color-tertiary-container);
     color: var(--md-sys-color-on-tertiary-container);

@@ -1,0 +1,10 @@
+.generators-static {
+    height: 160px;
+    margin-left: -50px;
+    width: 100px;
+}
+
+.generators-static .connector {
+    right: -10px;
+    top: 70px;
+}
