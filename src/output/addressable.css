@@ -1,5 +1,10 @@
 .led-outputs-addressable {
-    height: 100px;
+    height: 160px;
     margin-left: -100px;
     width: 200px;
+}
+
+.led-outputs-addressable .block-color-order {
+    letter-spacing: 10px;
+    text-align: center;
 }

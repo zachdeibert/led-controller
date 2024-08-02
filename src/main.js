@@ -138,6 +138,25 @@ class led_controller_block {
 
         static #dom_loaded = false;
 
+        static #nonce = 0;
+
+        /**
+         * @type {HTMLDivElement}
+         */
+        #root_element;
+
+        /**
+         * @type {HTMLFormElement}
+         */
+        #form_element;
+
+        /**
+         * @returns {string}
+         */
+        static get css_class() {
+            throw TypeError("led_controller_block.css_class is abstract");
+        }
+
         /**
          * @returns {string}
          */
@@ -153,10 +172,31 @@ class led_controller_block {
         }
 
         /**
-         * @returns {HTMLElement}
+         * @returns {string}
+         */
+        static get title() {
+            throw TypeError("led_controller_block.title is abstract");
+        }
+
+        /**
+         * @returns {HTMLDivElement}
          */
         get root_element() {
-            throw TypeError("led_controller_block.root_element is abstract");
+            return this.#root_element;
+        }
+
+        constructor() {
+            this.#root_element = document.createElement("div");
+            this.#root_element.classList.add(this.constructor.css_class);
+
+            const title = document.createElement("div");
+            title.classList.add("block-title");
+            title.innerText = this.constructor.title;
+            this.#root_element.appendChild(title);
+
+            this.#form_element = document.createElement("div");
+            this.#form_element.classList.add("block-form");
+            this.#root_element.appendChild(this.#form_element);
         }
 
         /**
@@ -221,5 +261,62 @@ class led_controller_block {
                             });
                         });
             });
+        }
+
+        /**
+         * @param {string} off_label
+         * @param {string} on_label
+         * @returns {HTMLInputElement}
+         */
+        add_switch(off_label, on_label) {
+            const div = document.createElement("div");
+            div.classList.add("switch");
+            this.#form_element.appendChild(div);
+
+            const label = document.createElement("label");
+            div.appendChild(label);
+
+            const off = document.createElement("span");
+            off.classList.add("switch-label");
+            off.innerText = off_label;
+            label.appendChild(off);
+
+            const input = document.createElement("input");
+            input.type  = "checkbox";
+            label.appendChild(input);
+
+            const lever = document.createElement("span");
+            lever.classList.add("lever");
+            label.appendChild(lever);
+
+            const on = document.createElement("span");
+            on.classList.add("switch-label");
+            on.innerText = on_label;
+            label.appendChild(on);
+
+            return input;
+        }
+
+        /**
+         * @param {string} type
+         * @param {string} label_text
+         * @returns {HTMLInputElement}
+         */
+        add_text_input(type, label_text) {
+            const input_field = document.createElement("div");
+            input_field.classList.add("input-field", "outlined");
+            this.#form_element.appendChild(input_field);
+
+            const input = document.createElement("input");
+            input.id    = `dynamic-id-${++led_controller_block.#nonce}`;
+            input.type  = type;
+            input_field.appendChild(input);
+
+            const label     = document.createElement("label");
+            label.htmlFor   = input.id;
+            label.innerText = label_text;
+            input_field.appendChild(label);
+
+            return input;
         }
 }

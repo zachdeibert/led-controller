@@ -105,6 +105,60 @@ body > #editor-container > .editor-grid-minor > .editor-grid-major > #editor-off
     width: 100%;
 }
 
+#editor-content > * > .block-form {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 20px);
+    padding: 5px;
+}
+
+#editor-content > * > .block-form::before {
+    content: " ";
+    flex-grow: 1;
+}
+
+#editor-content > * > .block-form::after {
+    content: " ";
+    flex-grow: 1;
+}
+
+#editor-content > * > .block-form > * {
+    margin: 4px 0;
+}
+
+#editor-content .input-field input {
+    background-color: var(--md-sys-color-tertiary-container);
+    color: var(--md-sys-color-on-tertiary-container);
+    height: 36px;
+    text-align: center;
+}
+
+#editor-content .input-field input + label {
+    background-color: var(--md-sys-color-tertiary-container);
+    color: var(--md-sys-color-on-tertiary-container);
+}
+
+#editor-content .switch {
+    --icon-size: 12px;
+    --size-off: 8px;
+    --size-on: 12px;
+    --track-height: 16px;
+    --track-width: 32px;
+}
+
+#editor-content .switch > label {
+    display: flex;
+}
+
+#editor-content .switch > label > .lever {
+    margin: 0 4px;
+}
+
+#editor-content .switch > label > .switch-label {
+    flex-basis: 0;
+    flex-grow: 1;
+}
+
 body > #editor-add-menu {
     width: 500px;
 }
