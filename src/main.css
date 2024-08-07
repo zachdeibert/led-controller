@@ -94,6 +94,21 @@ body > #editor-container > .editor-grid-minor > .editor-grid-major > #editor-off
     display: none;
     margin-top: -10px;
     position: absolute;
+    z-index: 1;
+}
+
+#editor-content > svg {
+    background-color: transparent;
+    display: block;
+    margin-top: 0;
+    z-index: 0;
+}
+
+#editor-content > svg > path {
+    fill: none;
+    stroke: var(--md-sys-color-primary-container);
+    stroke-linecap: round;
+    stroke-width: 10px;
 }
 
 #editor-content > * > .block-title {
@@ -131,6 +146,14 @@ body > #editor-container > .editor-grid-minor > .editor-grid-major > #editor-off
     height: 20px;
     position: absolute;
     width: 10px;
+}
+
+#editor-content > * > .block-connector.block-connector-input {
+    left: -10px;
+}
+
+#editor-content > * > .block-connector.block-connector-output {
+    right: -10px;
 }
 
 #editor-content .input-field input {

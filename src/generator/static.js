@@ -17,6 +17,6 @@ led_controller_block.register(class extends led_controller_block {
         const blue  = this.add_text_input("number", "Blue");
         blue.min    = 0;
         blue.max    = 255;
-        this.add_connector("connector");
+        this.add_connector("connector", false);
     }
 });

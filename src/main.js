@@ -5,14 +5,19 @@ class led_controller_editor {
         static GRID_SIZE_MINOR = 10;
 
         /**
+         * @type {led_controller_block[]}
+         */
+        static #blocks = [];
+
+        /**
+         * @type {led_controller_block | null}
+         */
+        static #dragging_block = null;
+
+        /**
          * @type {HTMLElement}
          */
         static #editor_content;
-
-        /**
-         * @type {HTMLElement | null}
-         */
-        static #dragging_block = null;
 
         static {
             document.addEventListener("DOMContentLoaded", () => {
@@ -24,6 +29,14 @@ class led_controller_editor {
                 M.Tooltip.init(document.querySelectorAll(".tooltipped"), {});
 
                 {
+                    /**
+                     * @type {SVGSVGElement | null}
+                     */
+                    let drag_arrow = null;
+                    /**
+                     * @type {HTMLElement | null}
+                     */
+                    let drag_from  = null;
                     let mouse_down = false;
                     let offset_x   = 0;
                     let offset_y   = 0;
@@ -37,7 +50,27 @@ class led_controller_editor {
                         } else if (this.#dragging_block !== null) {
                             this.#dragging_block = null;
                             ev.stopPropagation();
+                        } else if (drag_arrow !== null) {
+                            if (ev.target.classList.contains("block-connector") && drag_from !== ev.target) {
+                                const connection = [ drag_from, ev.target, drag_arrow ];
+                                this.#blocks[drag_from.parentElement.dataset.editorBlockId].connections.push(connection);
+                                this.#blocks[ev.target.parentElement.dataset.editorBlockId].connections.push(connection);
+                            } else {
+                                drag_arrow.remove();
+                            }
+                            drag_arrow = null;
+                            ev.stopPropagation();
                         }
+                    };
+                    /**
+                     * @param {MouseEvent} ev
+                     */
+                    const update_arrow = ev => {
+                        if (drag_arrow !== null) {
+                            drag_arrow.remove();
+                        }
+                        drag_arrow = this.#draw_arrow(drag_from,
+                                                      ev.target.classList.contains("block-connector") ? ev.target : ev);
                     };
                     editor_grid.addEventListener("mousedown", ev => {
                         if (ev.button !== 2) {
@@ -45,8 +78,13 @@ class led_controller_editor {
                                 this.#dragging_block = null;
                                 ev.stopPropagation();
                             } else if (ev.target === editor_container || ev.target === editor_grid
-                                       || ev.target === editor_offset || ev.target === this.#editor_content) {
+                                       || ev.target === editor_offset || ev.target === this.#editor_content
+                                       || ev.target.tagName == "svg") {
                                 mouse_down = true;
+                                ev.stopPropagation();
+                            } else if (ev.target.classList.contains("block-connector")) {
+                                drag_from = ev.target;
+                                update_arrow(ev);
                                 ev.stopPropagation();
                             }
                         }
@@ -79,12 +117,19 @@ class led_controller_editor {
                             editor_offset.style.top  = `${offset_y}px`;
                             ev.stopPropagation();
                         } else if (this.#dragging_block !== null) {
-                            const content                   = this.#editor_content.getBoundingClientRect();
-                            this.#dragging_block.style.left = `${
+                            const content                                = this.#editor_content.getBoundingClientRect();
+                            this.#dragging_block.root_element.style.left = `${
                                     Math.round((ev.x - content.x) / this.GRID_SIZE_MINOR) * this.GRID_SIZE_MINOR}px`;
-                            this.#dragging_block.style.top = `${
+                            this.#dragging_block.root_element.style.top = `${
                                     Math.round((ev.y - content.y) / this.GRID_SIZE_MINOR) * this.GRID_SIZE_MINOR}px`;
-                            this.#dragging_block.style.display = "block";
+                            this.#dragging_block.root_element.style.display = "block";
+                            this.#dragging_block.connections.forEach(connection => {
+                                connection[2].remove();
+                                connection[2] = this.#draw_arrow(connection[0], connection[1]);
+                            });
+                            ev.stopPropagation();
+                        } else if (drag_arrow !== null) {
+                            update_arrow(ev);
                             ev.stopPropagation();
                         }
                     });
@@ -97,16 +142,76 @@ class led_controller_editor {
          * @param {led_controller_block} block
          */
         static create_block(block) {
+            block.root_element.dataset.editorBlockId = this.#blocks.length;
+            this.#blocks.push(block);
+            this.#dragging_block = block;
             this.#editor_content.appendChild(block.root_element);
-            this.#dragging_block = block.root_element;
             block.root_element.querySelectorAll(".block-title").forEach(element => {
                 element.addEventListener("mousedown", ev => {
                     if (ev.button !== 2 && this.#dragging_block === null) {
-                        this.#dragging_block = block.root_element;
+                        this.#dragging_block = block;
                         ev.stopPropagation();
                     }
                 });
             });
+        }
+
+        /**
+         * @param {HTMLElement} from
+         * @param {HTMLElement | MouseEvent} to
+         * @returns {SVGSVGElement}
+         */
+        static #draw_arrow(from, to) {
+            const ARROW_WIDTH      = 10;
+            const CONTROL_DISTANCE = this.GRID_SIZE_MAJOR * 2;
+
+            let x0, y0, a0, x1, y1, x2, y2, x3, y3, x4, y4, a4, max_x, max_y, min_x, min_y;
+            const content_rect = this.#editor_content.getBoundingClientRect();
+            const from_rect    = from.getBoundingClientRect();
+            x0                 = from_rect.x - content_rect.x + from_rect.width / 2;
+            y0                 = from_rect.y - content_rect.y + from_rect.height / 2;
+            a0                 = from.classList.contains("block-connector-input") ? -1 : 1;
+            if (to instanceof MouseEvent) {
+                x4 = to.x - content_rect.x;
+                y4 = to.y - content_rect.y;
+                a4 = (x4 - x0) * a0 < this.GRID_SIZE_MAJOR ? a0 : -a0;
+            } else {
+                const to_rect = to.getBoundingClientRect();
+                x4            = to_rect.x - content_rect.x + to_rect.width / 2;
+                y4            = to_rect.y - content_rect.y + to_rect.height / 2;
+                a4            = to.classList.contains("block-connector-input") ? -1 : 1;
+            }
+            max_x  = Math.max(x0, x4) + CONTROL_DISTANCE + ARROW_WIDTH;
+            max_y  = Math.max(y0, y4) + CONTROL_DISTANCE + ARROW_WIDTH;
+            min_x  = Math.min(x0, x4) - CONTROL_DISTANCE - ARROW_WIDTH;
+            min_y  = Math.min(y0, y4) - CONTROL_DISTANCE - ARROW_WIDTH;
+            x0    -= min_x;
+            y0    -= min_y;
+            x4    -= min_x;
+            y4    -= min_y;
+            if (a0 == a4) {
+                x1 = x2 = x3 = a0 * (Math.max(x0 * a0, x4 * a0) + CONTROL_DISTANCE);
+            } else {
+                x1 = x0 + CONTROL_DISTANCE * a0;
+                x2 = (x0 + x4) / 2;
+                x3 = x4 + CONTROL_DISTANCE * a4;
+            }
+            y1 = y0;
+            y2 = (y0 + y4) / 2;
+            y3 = y4;
+
+            const svg        = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.style.height = `${max_y - min_y}px`;
+            svg.style.left   = `${min_x}px`;
+            svg.style.top    = `${min_y}px`;
+            svg.style.width  = `${max_x - min_x}px`;
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", `M${x0} ${y0} Q${x1} ${y1} ${x2} ${y2} Q${x3} ${y3} ${x4} ${y4}`);
+            svg.appendChild(path);
+
+            this.#editor_content.appendChild(svg);
+            return svg;
         }
 };
 
@@ -149,6 +254,11 @@ class led_controller_block {
          * @type {HTMLFormElement}
          */
         #form_element;
+
+        /**
+         * @type {[HTMLElement, HTMLElement, SVGSVGElement][]}
+         */
+        connections;
 
         /**
          * @returns {string}
@@ -197,6 +307,8 @@ class led_controller_block {
             this.#form_element = document.createElement("div");
             this.#form_element.classList.add("block-form");
             this.#root_element.appendChild(this.#form_element);
+
+            this.connections = [];
         }
 
         /**
@@ -265,10 +377,16 @@ class led_controller_block {
 
         /**
          * @param {string} class_name
+         * @param {boolean} input
          */
-        add_connector(class_name) {
+        add_connector(class_name, input) {
             const div = document.createElement("div");
             div.classList.add("block-connector", class_name);
+            if (input) {
+                div.classList.add("block-connector-input");
+            } else {
+                div.classList.add("block-connector-output");
+            }
             this.#root_element.appendChild(div);
         }
 
