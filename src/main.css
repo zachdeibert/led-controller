@@ -99,7 +99,6 @@ body > #editor-container > .editor-grid-minor > .editor-grid-major > #editor-off
 
 #editor-content > svg {
     background-color: transparent;
-    display: block;
     margin-top: 0;
     z-index: 0;
 }

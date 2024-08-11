@@ -1,13 +1,8 @@
 "use strict";
 
-led_controller_block.register(class extends led_controller_block {
-    static css_class = "generators-static";
-    static group     = "generators";
-    static name      = "Static Color";
-    static title     = "Static Color";
-
+led_controller_toolbar.register_block("Static Color", "generators", class extends led_controller_block {
     constructor() {
-        super();
+        super("Static Color", 100, 160);
         const red   = this.add_text_input("number", "Red");
         red.min     = 0;
         red.max     = 255;
@@ -17,6 +12,6 @@ led_controller_block.register(class extends led_controller_block {
         const blue  = this.add_text_input("number", "Blue");
         blue.min    = 0;
         blue.max    = 255;
-        this.add_connector("connector", false);
+        this.element.appendChild(new led_controller_connector(this, 70, false).element);
     }
 });
