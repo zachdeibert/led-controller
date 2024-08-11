@@ -95,7 +95,8 @@ class led_controller_grid {
          */
         drag_connector(connector) {
             this.#drag_object = new led_controller_connection(connector, connector);
-            this.#drag_state  = led_controller_grid.#DRAG_CONNECTION;
+            this.#drag_object.element.classList.add("invalid");
+            this.#drag_state = led_controller_grid.#DRAG_CONNECTION;
             this.#element.appendChild(this.#drag_object.element);
         }
 
@@ -104,6 +105,13 @@ class led_controller_grid {
          */
         hover_connector(connector) {
             if (this.#drag_state === led_controller_grid.#DRAG_CONNECTION) {
+                if (this.#drag_object.origin.net === this.#drag_object.target.net
+                    && (this.#drag_object.origin.net !== null
+                        || this.#drag_object.origin === this.#drag_object.target)) {
+                    this.#drag_object.element.classList.add("invalid");
+                } else {
+                    this.#drag_object.element.classList.remove("invalid");
+                }
                 this.#drag_object.target = connector;
                 this.#drag_object.update();
             }
@@ -143,6 +151,7 @@ class led_controller_grid {
                     break;
 
                 case led_controller_grid.#DRAG_CONNECTION:
+                    this.#drag_object.element.classList.remove("invalid");
                     this.#drag_object.target = ev;
                     this.#drag_object.update();
                     break;
@@ -186,11 +195,15 @@ class led_controller_grid {
                 case led_controller_grid.#DRAG_BLOCK: break;
 
                 case led_controller_grid.#DRAG_CONNECTION:
-                    if (this.#drag_object.target instanceof MouseEvent) {
+                    if ((this.#drag_object.target instanceof MouseEvent)
+                        || this.#drag_object.element.classList.contains("invalid")) {
                         this.#drag_object.element.remove();
                     } else {
-                        this.#drag_object.origin.block.connections.push(this.#drag_object);
-                        this.#drag_object.target.block.connections.push(this.#drag_object);
+                        const net
+                                = led_controller_net.merge(this.#drag_object.origin.net, this.#drag_object.target.net);
+                        net.connections.push(this.#drag_object);
+                        this.#drag_object.origin.net = net;
+                        this.#drag_object.target.net = net;
                     }
                     break;
 

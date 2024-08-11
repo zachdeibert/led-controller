@@ -38,6 +38,11 @@ class led_controller_connector {
         }
 
         /**
+         * @type {led_controller_net | null}
+         */
+        net;
+
+        /**
          * @returns {boolean}
          */
         get output() {
@@ -61,6 +66,7 @@ class led_controller_connector {
 
             this.#block = block;
             this.#input = input;
+            this.net    = null;
 
             this.#element.addEventListener("mousedown", ev => {
                 if (ev.button !== 2) {

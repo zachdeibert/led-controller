@@ -17,6 +17,6 @@ led_controller_toolbar.register_block("Generic ARGB", "led-outputs", class exten
         });
         this.add_switch("400 kHz", "800 kHz").checked        = true;
         this.add_switch("Active Low", "Active High").checked = true;
-        this.element.appendChild(new led_controller_connector(this, 70, true).element);
+        this.add_connector(70, true);
     }
 });

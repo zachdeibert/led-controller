@@ -110,6 +110,10 @@ body > #editor-container > .editor-grid-minor > .editor-grid-major > #editor-off
     stroke-width: 10px;
 }
 
+#editor-content > svg.invalid > path {
+    stroke: var(--md-sys-color-error);
+}
+
 #editor-content > * > .block-title {
     background-color: var(--md-sys-color-tertiary);
     color: var(--md-sys-color-on-tertiary);

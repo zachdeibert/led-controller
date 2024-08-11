@@ -12,6 +12,6 @@ led_controller_toolbar.register_block("Static Color", "generators", class extend
         const blue  = this.add_text_input("number", "Blue");
         blue.min    = 0;
         blue.max    = 255;
-        this.element.appendChild(new led_controller_connector(this, 70, false).element);
+        this.add_connector(70, false);
     }
 });

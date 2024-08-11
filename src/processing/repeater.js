@@ -4,7 +4,7 @@ led_controller_toolbar.register_block("Repeater", "processing", class extends le
     constructor() {
         super("Repeater", 100, 70);
         this.add_text_input("number", "Factor").min = 0;
-        this.element.appendChild(new led_controller_connector(this, 30, true).element);
-        this.element.appendChild(new led_controller_connector(this, 30, false).element);
+        this.add_connector(30, true);
+        this.add_connector(30, false);
     }
 });

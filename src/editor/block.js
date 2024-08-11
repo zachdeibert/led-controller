@@ -14,9 +14,9 @@ class led_controller_block {
         #form;
 
         /**
-         * @type {led_controller_connection[]}
+         * @type {led_controller_connector[]}
          */
-        connections;
+        connectors;
 
         /**
          * @returns {HTMLDivElement}
@@ -45,7 +45,7 @@ class led_controller_block {
             this.#form.classList.add("block-form");
             this.#element.appendChild(this.#form);
 
-            this.connections = [];
+            this.connectors = [];
 
             title_div.addEventListener("mousedown", ev => {
                 if (ev.button !== 2) {
@@ -54,6 +54,16 @@ class led_controller_block {
                 }
             });
             this.#element.addEventListener("mousedown", ev => { ev.stopPropagation(); });
+        }
+
+        /**
+         * @param {number} y
+         * @param {boolean} input
+         */
+        add_connector(y, input) {
+            const connector = new led_controller_connector(this, y, input);
+            this.connectors.push(connector);
+            this.#element.appendChild(connector.element);
         }
 
         /**
@@ -114,6 +124,14 @@ class led_controller_block {
         }
 
         update() {
-            this.connections.forEach(connection => { connection.update(); });
+            this.connectors.forEach(connector => {
+                if (connector.net !== null) {
+                    connector.net.connections.forEach(connection => {
+                        if (connection.origin === connector || connection.target === connector) {
+                            connection.update();
+                        }
+                    });
+                }
+            });
         }
 }
