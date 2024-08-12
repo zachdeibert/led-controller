@@ -19,6 +19,29 @@ class led_controller_block {
         connectors;
 
         /**
+         * @returns {led_controller_block[]}
+         */
+        get dependents() {
+            /**
+             * @type {Set<led_controller_block>}
+             */
+            const dependents = new Set();
+            this.connectors.forEach(connector => {
+                if (connector.output && connector.net !== null) {
+                    connector.net.connections.forEach(connection => {
+                        if (connection.origin.input) {
+                            dependents.add(connection.origin.block);
+                        }
+                        if (connection.target.input) {
+                            dependents.add(connection.target.block);
+                        }
+                    });
+                }
+            });
+            return Array(...dependents);
+        }
+
+        /**
          * @returns {HTMLDivElement}
          */
         get element() {

@@ -15,6 +15,11 @@ class led_controller_grid {
         static instance;
 
         /**
+         * @type {led_controller_block[]}
+         */
+        #blocks;
+
+        /**
          * @type {HTMLDivElement}
          */
         #container;
@@ -71,6 +76,7 @@ class led_controller_grid {
             this.#grid      = document.getElementById("editor-grid");
             this.#offset    = document.getElementById("editor-offset");
 
+            this.#blocks      = [];
             this.#drag_object = null;
             this.#drag_state  = led_controller_grid.#DRAG_NONE;
             this.#offset_x    = 0;
@@ -80,6 +86,15 @@ class led_controller_grid {
             this.#grid.addEventListener("mouseleave", ev => this.#mouse_up(ev));
             this.#grid.addEventListener("mousemove", ev => this.#mouse_move(ev));
             this.#grid.addEventListener("mouseup", ev => this.#mouse_up(ev));
+        }
+
+        /**
+         * @param {led_controller_block} block
+         */
+        add_block(block) {
+            this.#blocks.push(block);
+            this.#element.appendChild(block.element);
+            this.drag_block(block);
         }
 
         /**
@@ -104,17 +119,56 @@ class led_controller_grid {
          * @param {led_controller_connector} connector
          */
         hover_connector(connector) {
-            if (this.#drag_state === led_controller_grid.#DRAG_CONNECTION) {
-                if (this.#drag_object.origin.net === this.#drag_object.target.net
-                    && (this.#drag_object.origin.net !== null
-                        || this.#drag_object.origin === this.#drag_object.target)) {
+            if (this.#drag_state === led_controller_grid.#DRAG_CONNECTION && this.#drag_object.target !== connector) {
+                this.#drag_object.target = connector;
+                /**
+                 * @type {led_controller_connector}
+                 */
+                const origin             = this.#drag_object.origin;
+                /**
+                 * @type {led_controller_connector}
+                 */
+                const target             = this.#drag_object.target;
+                if (origin.net === target.net && origin.net !== null) {
+                    // Can't connect a loop of connections within a single net
+                    this.#drag_object.element.classList.add("invalid");
+                } else if (origin == target) {
+                    // Can't connect a connector to itself
+                    this.#drag_object.element.classList.add("invalid");
+                } else if (this.#count_drivers(this.#drag_object) > 1) {
+                    // Can't connect two outputs to a single net
+                    this.#drag_object.element.classList.add("invalid");
+                } else if (!led_controller_net.remains_dag(this.#blocks, this.#drag_object)) {
+                    // Can't create a cycle of blocks
                     this.#drag_object.element.classList.add("invalid");
                 } else {
                     this.#drag_object.element.classList.remove("invalid");
                 }
-                this.#drag_object.target = connector;
                 this.#drag_object.update();
             }
+        }
+
+        /**
+         * @param {led_controller_connection} connection
+         * @returns {number}
+         */
+        #count_drivers(connection) {
+            let drivers = 0;
+            if (connection.origin.net !== null) {
+                if (connection.origin.net.driver !== null) {
+                    ++drivers;
+                }
+            } else if (connection.origin.output) {
+                ++drivers;
+            }
+            if (connection.target.net !== null) {
+                if (connection.target.net.driver !== null) {
+                    ++drivers;
+                }
+            } else if (connection.target.output) {
+                ++drivers;
+            }
+            return drivers;
         }
 
         /**

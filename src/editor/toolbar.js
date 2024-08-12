@@ -64,9 +64,7 @@ class led_controller_toolbar {
                                 item.innerText = block_type[0];
                                 item.addEventListener("click", ev => {
                                     sidenav.close();
-                                    const block = new block_type[1]();
-                                    led_controller_grid.instance.element.appendChild(block.element);
-                                    led_controller_grid.instance.drag_block(block);
+                                    led_controller_grid.instance.add_block(new block_type[1]());
                                     ev.stopPropagation();
                                 });
                                 editor_group.appendChild(item);
@@ -82,7 +80,7 @@ class led_controller_toolbar {
          */
         static register_block(name, group, type) {
             if (this.#dom_loaded) {
-                throw TypeError("All led_controller_block subclasses must be registered before the DOM loads");
+                throw new TypeError("All led_controller_block subclasses must be registered before the DOM loads");
             } else if (group === "led-outputs") {
                 this.#led_output_blocks.push([ name, type ]);
             } else if (group === "control-inputs") {
@@ -94,7 +92,7 @@ class led_controller_toolbar {
             } else if (group === "utilities") {
                 this.#utility_blocks.push([ name, type ]);
             } else {
-                throw TypeError(`Invalid led_controller_block.group value "${group}"`)
+                throw new TypeError(`Invalid led_controller_block.group value "${group}"`)
             }
         }
 };
