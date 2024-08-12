@@ -168,6 +168,7 @@ body > #editor-container > .editor-grid-minor > .editor-grid-major > #editor-off
 
 #editor-content .input-field input + label {
     background-color: var(--md-sys-color-tertiary-container);
+    border-radius: 4px;
     color: var(--md-sys-color-on-tertiary-container);
 }
 
@@ -209,4 +210,8 @@ body > ul.sidenav > li > .collapsible-body > .collapsible-item {
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
     line-height: 1.5;
     padding: 1rem 2rem;
+}
+
+body > #editor-color-modal {
+    width: calc(300px + 2 * var(--modal-padding));
 }

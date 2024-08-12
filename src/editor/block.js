@@ -1,6 +1,13 @@
 "use strict";
 
 class led_controller_block {
+        /**
+         * @type {HTMLInputElement | null}
+         */
+        static #color_field = null;
+
+        static #color_modal;
+        static #color_picker;
         static #nonce = 0;
 
         /**
@@ -48,6 +55,22 @@ class led_controller_block {
             return this.#element;
         }
 
+        static {
+            document.addEventListener("DOMContentLoaded", () => {
+                const color_modal         = document.getElementById("editor-color-modal");
+                const color_modal_content = document.getElementById("editor-color-modal-content");
+                const color_modal_ok      = document.getElementById("editor-color-modal-ok");
+
+                this.#color_modal  = M.Modal.init([ color_modal ])[0];
+                this.#color_picker = new iro.ColorPicker(color_modal_content);
+
+                color_modal_ok.addEventListener("click", () => {
+                    this.#color_field.value = this.#color_picker.color.hexString.toUpperCase();
+                    this.#color_field.dispatchEvent(new Event("input"));
+                });
+            });
+        }
+
         /**
          * @param {string} title
          * @param {number} width
@@ -77,6 +100,48 @@ class led_controller_block {
                 }
             });
             this.#element.addEventListener("mousedown", ev => { ev.stopPropagation(); });
+        }
+
+        /**
+         * @param {string} label_text
+         * @returns {HTMLInputElement}
+         */
+        add_color_input(label_text) {
+            const input           = this.add_text_input("text", label_text);
+            input.style.textAlign = "left";
+            input.value           = "#FFFFFF";
+
+            const update_style = () => {
+                const background            = input.value.padEnd(7, "0");
+                // http://stackoverflow.com/a/3943023/112731
+                let r                       = parseInt(background.substring(1, 3), 16) / 255;
+                let g                       = parseInt(background.substring(3, 5), 16) / 255;
+                let b                       = parseInt(background.substring(5, 7), 16) / 255;
+                r                           = r <= 0.04045 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+                g                           = g <= 0.04045 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+                b                           = b <= 0.04045 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+                const l                     = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                const foreground            = l >= 0.179 ? "#000000" : "#FFFFFF";
+                input.style.backgroundColor = background;
+                input.style.borderColor     = foreground;
+                input.style.color           = foreground;
+            };
+            update_style();
+            input.addEventListener("dblclick", () => {
+                led_controller_block.#color_field                  = input;
+                led_controller_block.#color_picker.color.hexString = input.value.padEnd(7, "0");
+                led_controller_block.#color_modal.open();
+            });
+            input.addEventListener("input", () => {
+                const orig_value = input.value;
+                const new_value  = "#" + orig_value.toUpperCase().replace(/[^0-9A-F]/g, "").substring(0, 6);
+                if (orig_value !== new_value) {
+                    input.value = new_value;
+                }
+                update_style();
+            });
+
+            return input;
         }
 
         /**

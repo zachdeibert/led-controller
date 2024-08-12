@@ -11,6 +11,7 @@
         <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
         <link href="src/main.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/@materializecss/materialize@2.1.0/dist/js/materialize.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
         <script src="src/editor/block.js"></script>
         <script src="src/editor/connection.js"></script>
         <script src="src/editor/connector.js"></script>
@@ -145,5 +146,12 @@
                 <div class="collapsible-body" id="editor-group-utilities"></div>
             </li>
         </ul>
+        <div class="modal" id="editor-color-modal">
+            <div class="modal-content" id="editor-color-modal-content"></div>
+            <div class="modal-footer">
+                <a class="modal-close waves-effect btn-flat">Cancel</a>
+                <a class="modal-close waves-effect btn-flat" id="editor-color-modal-ok">OK</a>
+            </div>
+        </div>
     </body>
 </html>
