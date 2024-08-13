@@ -107,6 +107,13 @@ class led_controller_grid {
         /**
          * @param {led_controller_block} block
          */
+        remove_block(block) {
+            this.#blocks.splice(this.#blocks.indexOf(block), 1);
+        }
+
+        /**
+         * @param {led_controller_block} block
+         */
         drag_block(block) {
             if (this.#selection !== null) {
                 this.#selection.element.classList.remove("selected");
@@ -203,6 +210,15 @@ class led_controller_grid {
          */
         #key_down(ev) {
             switch (ev.code) {
+                case "Backspace":
+                case "Delete":
+                    if (this.#selection !== null) {
+                        this.#selection.remove();
+                        this.#selection = null;
+                    }
+                    ev.stopPropagation();
+                    break;
+
                 case "Escape":
                     if (this.#selection !== null) {
                         this.#selection.element.classList.remove("selected");

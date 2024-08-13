@@ -46,6 +46,53 @@ class led_controller_net {
         }
 
         /**
+         * @param {led_controller_connection} connection
+         */
+        split(connection) {
+            const origin_net = new led_controller_net();
+            const target_net = new led_controller_net();
+            /**
+             * @type {Map<led_controller_connector, led_controller_net>}
+             */
+            const new_nets   = new Map([ [ connection.origin, origin_net ], [ connection.target, target_net ] ]);
+            let to_sort      = [...this.connections ];
+            to_sort.splice(this.connections.indexOf(connection), 1);
+            while (to_sort.length > 0) {
+                let changed = false;
+                to_sort     = to_sort.filter(connection => {
+                    if (new_nets.has(connection.origin)) {
+                        const net             = new_nets.get(connection.origin);
+                        connection.target.net = net;
+                        net.connections.push(connection);
+                        new_nets.set(connection.target, net);
+                    } else if (new_nets.has(connection.target)) {
+                        const net             = new_nets.get(connection.target);
+                        connection.origin.net = net;
+                        net.connections.push(connection);
+                        new_nets.set(connection.origin, net);
+                    } else {
+                        return true;
+                    }
+                    changed = true;
+                    return false;
+                });
+                if (!changed) {
+                    throw new TypeError("Unable to split net across connection");
+                }
+            }
+            if (origin_net.connections.length > 0) {
+                connection.origin.net = origin_net;
+            } else {
+                connection.origin.net = null;
+            }
+            if (target_net.connections.length > 0) {
+                connection.target.net = target_net;
+            } else {
+                connection.target.net = null;
+            }
+        }
+
+        /**
          * @param {led_controller_block[]} blocks
          * @param {led_controller_connection} new_connection
          * @returns {boolean}

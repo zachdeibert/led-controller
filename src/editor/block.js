@@ -215,6 +215,20 @@ class led_controller_block {
             return input;
         }
 
+        remove() {
+            this.connectors.forEach(connector => {
+                if (connector.net !== null) {
+                    connector.net.connections.forEach(connection => {
+                        if (connection.origin === connector || connection.target === connector) {
+                            connection.remove();
+                        }
+                    });
+                }
+            });
+            this.#element.remove();
+            led_controller_grid.instance.remove_block(this);
+        }
+
         update() {
             this.connectors.forEach(connector => {
                 if (connector.net !== null) {

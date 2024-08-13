@@ -50,6 +50,11 @@ class led_controller_connection {
             });
         }
 
+        remove() {
+            this.origin.net.split(this);
+            this.#element.remove();
+        }
+
         update() {
             const parent_rect = this.#element.parentElement.getBoundingClientRect();
             const origin_rect = this.origin.element.getBoundingClientRect();
