@@ -215,6 +215,13 @@ class led_controller_block {
             return input;
         }
 
+        /**
+         * @returns {led_controller_block}
+         */
+        copy() {
+            throw TypeError("led_controller_block.copy() is abstract");
+        }
+
         remove() {
             this.connectors.forEach(connector => {
                 if (connector.net !== null) {

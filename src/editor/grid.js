@@ -20,6 +20,11 @@ class led_controller_grid {
         #blocks;
 
         /**
+         * @type {led_controller_block | null}
+         */
+        #clipboard;
+
+        /**
          * @type {HTMLDivElement}
          */
         #container;
@@ -82,6 +87,7 @@ class led_controller_grid {
             this.#offset    = document.getElementById("editor-offset");
 
             this.#blocks      = [];
+            this.#clipboard   = null;
             this.#drag_object = null;
             this.#drag_state  = led_controller_grid.#DRAG_NONE;
             this.#offset_x    = 0;
@@ -225,6 +231,24 @@ class led_controller_grid {
                         this.#selection = null;
                     }
                     ev.stopPropagation();
+                    break;
+
+                case "KeyC":
+                    if (ev.ctrlKey && !ev.altKey && !ev.shiftKey) {
+                        if (this.#selection !== null && this.#selection instanceof led_controller_block) {
+                            this.#clipboard = this.#selection.copy();
+                        }
+                        ev.stopPropagation();
+                    }
+                    break;
+
+                case "KeyV":
+                    if (ev.ctrlKey && !ev.altKey && !ev.shiftKey) {
+                        if (this.#clipboard !== null) {
+                            this.add_block(this.#clipboard.copy());
+                        }
+                        ev.stopPropagation();
+                    }
                     break;
             }
         }
