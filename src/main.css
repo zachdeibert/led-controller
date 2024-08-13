@@ -89,17 +89,22 @@ body > #editor-container > .editor-grid-minor > .editor-grid-major > #editor-off
 }
 
 #editor-content > * {
+    display: none;
+    position: absolute;
+}
+
+#editor-content > div {
     background-color: var(--md-sys-color-tertiary-container);
     color: var(--md-sys-color-on-tertiary-container);
-    display: none;
     margin-top: -10px;
-    position: absolute;
     z-index: 1;
 }
 
+#editor-content > div.selected {
+    box-shadow: var(--md-sys-color-primary) 0 0 5px;
+}
+
 #editor-content > svg {
-    background-color: transparent;
-    margin-top: 0;
     z-index: 0;
 }
 
@@ -112,6 +117,10 @@ body > #editor-container > .editor-grid-minor > .editor-grid-major > #editor-off
 
 #editor-content > svg.invalid > path {
     stroke: var(--md-sys-color-error);
+}
+
+#editor-content > svg.selected > path {
+    filter: drop-shadow(var(--md-sys-color-primary) 0 0 5px);
 }
 
 #editor-content > * > .block-title {

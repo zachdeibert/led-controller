@@ -94,12 +94,16 @@ class led_controller_block {
             this.connectors = [];
 
             title_div.addEventListener("mousedown", ev => {
-                if (ev.button !== 2) {
+                if (ev.button === 0) {
                     led_controller_grid.instance.drag_block(this);
                     ev.stopPropagation();
                 }
             });
-            this.#element.addEventListener("mousedown", ev => { ev.stopPropagation(); });
+            this.#element.addEventListener("mousedown", ev => {
+                if (ev.button === 0) {
+                    ev.stopPropagation();
+                }
+            });
         }
 
         /**

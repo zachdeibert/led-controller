@@ -42,6 +42,12 @@ class led_controller_connection {
             this.#element.appendChild(this.#path);
             this.origin = origin;
             this.target = target;
+            this.#path.addEventListener("mousedown", ev => {
+                if (ev.button === 0) {
+                    led_controller_grid.instance.drag_connection(this);
+                    ev.stopPropagation();
+                }
+            });
         }
 
         update() {
