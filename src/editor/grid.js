@@ -5,6 +5,7 @@ class led_controller_grid {
         static #DRAG_BLOCK      = 1;
         static #DRAG_CONNECTION = 2;
         static #DRAG_GRID       = 3;
+        static #DRAG_NEW_BLOCK  = 4;
 
         static MAJOR = 50;
         static MINOR = 10;
@@ -33,6 +34,11 @@ class led_controller_grid {
          * @type {led_controller_block | led_controller_connection | null}
          */
         #drag_object;
+
+        /**
+         * @type {[string, string]}
+         */
+        #drag_start;
 
         /**
          * @type {number}
@@ -89,6 +95,7 @@ class led_controller_grid {
             this.#blocks      = [];
             this.#clipboard   = null;
             this.#drag_object = null;
+            this.#drag_start  = [ "", "" ];
             this.#drag_state  = led_controller_grid.#DRAG_NONE;
             this.#offset_x    = 0;
             this.#offset_y    = 0;
@@ -108,6 +115,7 @@ class led_controller_grid {
             this.#blocks.push(block);
             this.#element.appendChild(block.element);
             this.drag_block(block);
+            this.#drag_state = led_controller_grid.#DRAG_NEW_BLOCK;
         }
 
         /**
@@ -127,6 +135,7 @@ class led_controller_grid {
             block.element.classList.add("selected");
             this.#selection   = block;
             this.#drag_object = block;
+            this.#drag_start  = [ block.element.style.left, block.element.style.top ];
             this.#drag_state  = led_controller_grid.#DRAG_BLOCK;
         }
 
@@ -226,9 +235,30 @@ class led_controller_grid {
                     break;
 
                 case "Escape":
-                    if (this.#selection !== null) {
-                        this.#selection.element.classList.remove("selected");
-                        this.#selection = null;
+                    switch (this.#drag_state) {
+                        case led_controller_grid.#DRAG_NONE:
+                            if (this.#selection !== null) {
+                                this.#selection.element.classList.remove("selected");
+                                this.#selection = null;
+                            }
+                            break;
+
+                        case led_controller_grid.#DRAG_BLOCK:
+                            this.#drag_object.element.style.left = this.#drag_start[0];
+                            this.#drag_object.element.style.top  = this.#drag_start[1];
+                            this.#drag_object                    = null;
+                            this.#drag_state                     = led_controller_grid.#DRAG_NONE;
+                            break;
+
+                        case led_controller_grid.#DRAG_CONNECTION:
+                        case led_controller_grid.#DRAG_GRID      : this.#mouse_up(ev); break;
+
+                        case led_controller_grid.#DRAG_NEW_BLOCK:
+                            this.#drag_object.remove();
+                            this.#drag_object = null;
+                            this.#drag_state  = led_controller_grid.#DRAG_NONE;
+                            this.#selection   = null;
+                            break;
                     }
                     ev.stopPropagation();
                     break;
@@ -279,6 +309,7 @@ class led_controller_grid {
                 case led_controller_grid.#DRAG_NONE: return;
 
                 case led_controller_grid.#DRAG_BLOCK:
+                case led_controller_grid.#DRAG_NEW_BLOCK:
                     const content = this.#element.getBoundingClientRect();
                     let x         = ev.x - content.x;
                     let y         = ev.y - content.y;
@@ -326,7 +357,7 @@ class led_controller_grid {
         }
 
         /**
-         * @param {MouseEvent} ev
+         * @param {Event} ev
          */
         #mouse_up(ev) {
             switch (this.#drag_state) {
@@ -348,6 +379,8 @@ class led_controller_grid {
                     break;
 
                 case led_controller_grid.#DRAG_GRID: break;
+
+                case led_controller_grid.#DRAG_NEW_BLOCK: break;
             }
             this.#drag_object = null;
             this.#drag_state  = led_controller_grid.#DRAG_NONE;
