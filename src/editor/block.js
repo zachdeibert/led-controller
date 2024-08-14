@@ -108,15 +108,18 @@ class led_controller_block {
 
         /**
          * @param {string} label_text
+         * @param {string} value
+         * @param {(value: string) => void} on_change
          * @returns {HTMLInputElement}
          */
-        add_color_input(label_text) {
-            const input           = this.add_text_input("text", label_text);
-            input.style.textAlign = "left";
-            input.value           = "#FFFFFF";
+        add_color_input(label_text, value, on_change = () => {}) {
+            /**
+             * @type {HTMLInputElement}
+             */
+            let input;
 
-            const update_style = () => {
-                const background            = input.value.padEnd(7, "0");
+            const update_style = v => {
+                const background            = v.padEnd(7, "0");
                 // http://stackoverflow.com/a/3943023/112731
                 let r                       = parseInt(background.substring(1, 3), 16) / 255;
                 let g                       = parseInt(background.substring(3, 5), 16) / 255;
@@ -129,20 +132,21 @@ class led_controller_block {
                 input.style.backgroundColor = background;
                 input.style.borderColor     = foreground;
                 input.style.color           = foreground;
+                on_change(v);
             };
-            update_style();
+
+            input                 = this.add_text_input("text",
+                                        label_text,
+                                        value,
+                                        v => "#" + v.toUpperCase().replace(/[^0-9A-F]/g, "").substring(0, 6),
+                                        update_style);
+            input.style.textAlign = "left";
+            update_style(value);
+
             input.addEventListener("dblclick", () => {
                 led_controller_block.#color_field                  = input;
                 led_controller_block.#color_picker.color.hexString = input.value.padEnd(7, "0");
                 led_controller_block.#color_modal.open();
-            });
-            input.addEventListener("input", () => {
-                const orig_value = input.value;
-                const new_value  = "#" + orig_value.toUpperCase().replace(/[^0-9A-F]/g, "").substring(0, 6);
-                if (orig_value !== new_value) {
-                    input.value = new_value;
-                }
-                update_style();
             });
 
             return input;
@@ -161,9 +165,11 @@ class led_controller_block {
         /**
          * @param {string} off_label
          * @param {string} on_label
+         * @param {boolean} value
+         * @param {(value: boolean) => void} on_change
          * @returns {HTMLInputElement}
          */
-        add_switch(off_label, on_label) {
+        add_switch(off_label, on_label, value, on_change = () => {}) {
             const div = document.createElement("div");
             div.classList.add("switch");
             this.#form.appendChild(div);
@@ -176,8 +182,9 @@ class led_controller_block {
             off.innerText = off_label;
             label.appendChild(off);
 
-            const input = document.createElement("input");
-            input.type  = "checkbox";
+            const input   = document.createElement("input");
+            input.checked = value;
+            input.type    = "checkbox";
             label.appendChild(input);
 
             const lever = document.createElement("span");
@@ -189,15 +196,31 @@ class led_controller_block {
             on.innerText = on_label;
             label.appendChild(on);
 
+            input.addEventListener("change", () => {
+                const value = input.checked;
+                led_controller_toolbar.instance.handle_action(
+                        () => {
+                            input.checked = value;
+                            on_change(value);
+                        },
+                        () => {
+                            input.checked = !value;
+                            on_change(!value);
+                        });
+            });
+
             return input;
         }
 
         /**
          * @param {string} type
          * @param {string} label_text
+         * @param {string} value
+         * @param {(value: string) => string} validate
+         * @param {(value: string) => void} on_change
          * @returns {HTMLInputElement}
          */
-        add_text_input(type, label_text) {
+        add_text_input(type, label_text, value, validate = null, on_change = () => {}) {
             const input_field = document.createElement("div");
             input_field.classList.add("input-field", "outlined");
             this.#form.appendChild(input_field);
@@ -205,12 +228,64 @@ class led_controller_block {
             const input = document.createElement("input");
             input.id    = `dynamic-block-id-${++led_controller_block.#nonce}`;
             input.type  = type;
+            input.value = value;
             input_field.appendChild(input);
 
             const label     = document.createElement("label");
             label.htmlFor   = input.id;
             label.innerText = label_text;
             input_field.appendChild(label);
+
+            if (validate === null) {
+                switch (type) {
+                    case "number":
+                        validate = v => {
+                            v = v.replace(/[^0-9]/g, "");
+                            if (v.length == 0) {
+                                v = "0";
+                            }
+                            let i = parseInt(v);
+                            if (input.min.length > 0) {
+                                let b = parseInt(input.min);
+                                if (i < b) {
+                                    i = b;
+                                }
+                            }
+                            if (input.max.length > 0) {
+                                let b = parseInt(input.max);
+                                if (i > b) {
+                                    i = b;
+                                }
+                            }
+                            return i.toString();
+                        };
+                        break;
+
+                    default: validate = v => v; break;
+                }
+            }
+
+            let prev_value = value;
+            input.addEventListener("input", () => {
+                const orig_value = input.value;
+                const new_value  = validate(orig_value);
+                const old_value  = prev_value;
+                if (new_value !== old_value) {
+                    led_controller_toolbar.instance.handle_action(
+                            () => {
+                                input.value = new_value;
+                                prev_value  = new_value;
+                                on_change(new_value);
+                            },
+                            () => {
+                                input.value = old_value;
+                                prev_value  = old_value;
+                                on_change(old_value);
+                            });
+                } else if (new_value !== orig_value) {
+                    input.value = new_value;
+                }
+            });
 
             return input;
         }
@@ -222,18 +297,27 @@ class led_controller_block {
             throw TypeError("led_controller_block.copy() is abstract");
         }
 
+        /**
+         * @returns {led_controller_connection[]}
+         */
         remove() {
+            /**
+             * @type {led_controller_connection[]}
+             */
+            const removed_connections = [];
             this.connectors.forEach(connector => {
                 if (connector.net !== null) {
                     connector.net.connections.forEach(connection => {
                         if (connection.origin === connector || connection.target === connector) {
                             connection.remove();
+                            removed_connections.push(connection);
                         }
                     });
                 }
             });
             this.#element.remove();
             led_controller_grid.instance.remove_block(this);
+            return removed_connections;
         }
 
         update() {

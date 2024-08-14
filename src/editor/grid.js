@@ -112,8 +112,7 @@ class led_controller_grid {
          * @param {led_controller_block} block
          */
         add_block(block) {
-            this.#blocks.push(block);
-            this.#element.appendChild(block.element);
+            this.#add_block(block);
             this.drag_block(block);
             this.#drag_state = led_controller_grid.#DRAG_NEW_BLOCK;
         }
@@ -125,27 +124,32 @@ class led_controller_grid {
             this.#blocks.splice(this.#blocks.indexOf(block), 1);
         }
 
+        deselect() {
+            if (this.#selection !== null) {
+                this.#selection.element.classList.remove("selected");
+                this.#selection = null;
+            }
+        }
+
         /**
          * @param {led_controller_block} block
          */
         drag_block(block) {
-            if (this.#selection !== null) {
-                this.#selection.element.classList.remove("selected");
+            if (this.#drag_state !== led_controller_grid.#DRAG_NEW_BLOCK) {
+                this.deselect();
+                block.element.classList.add("selected");
+                this.#selection   = block;
+                this.#drag_object = block;
+                this.#drag_start  = [ block.element.style.left, block.element.style.top ];
+                this.#drag_state  = led_controller_grid.#DRAG_BLOCK;
             }
-            block.element.classList.add("selected");
-            this.#selection   = block;
-            this.#drag_object = block;
-            this.#drag_start  = [ block.element.style.left, block.element.style.top ];
-            this.#drag_state  = led_controller_grid.#DRAG_BLOCK;
         }
 
         /**
          * @param {led_controller_connection} connection
          */
         drag_connection(connection) {
-            if (this.#selection !== null) {
-                this.#selection.element.classList.remove("selected");
-            }
+            this.deselect();
             connection.element.classList.add("selected");
             this.#selection = connection;
         }
@@ -154,10 +158,7 @@ class led_controller_grid {
          * @param {led_controller_connector} connector
          */
         drag_connector(connector) {
-            if (this.#selection !== null) {
-                this.#selection.element.classList.remove("selected");
-                this.#selection = null;
-            }
+            this.deselect();
             this.#drag_object = new led_controller_connection(connector, connector);
             this.#drag_object.element.classList.add("invalid");
             this.#drag_state = led_controller_grid.#DRAG_CONNECTION;
@@ -198,6 +199,27 @@ class led_controller_grid {
         }
 
         /**
+         * @param {led_controller_block} block
+         */
+        #add_block(block) {
+            this.#blocks.push(block);
+            this.#element.appendChild(block.element);
+        }
+
+        /**
+         * @param {led_controller_connection} connection
+         */
+        #add_connection(connection) {
+            const net = led_controller_net.merge(connection.origin.net, connection.target.net);
+            net.connections.push(connection);
+            connection.origin.net = net;
+            connection.target.net = net;
+            if (connection.element.parentElement === null) {
+                this.#element.appendChild(connection.element);
+            }
+        }
+
+        /**
          * @param {led_controller_connection} connection
          * @returns {number}
          */
@@ -227,21 +249,35 @@ class led_controller_grid {
             switch (ev.code) {
                 case "Backspace":
                 case "Delete":
-                    if (this.#selection !== null) {
-                        this.#selection.remove();
-                        this.#selection = null;
+                    const selection = this.#selection;
+                    if (selection !== null) {
+                        this.deselect();
+                        const connections = [];
+                        led_controller_toolbar.instance.handle_action(
+                                () => {
+                                    if (selection instanceof led_controller_block) {
+                                        connections.push(...selection.remove());
+                                    } else {
+                                        selection.remove();
+                                    }
+                                },
+                                () => {
+                                    if (selection instanceof led_controller_block) {
+                                        this.#add_block(selection);
+                                        while (connections.length > 0) {
+                                            this.#add_connection(connections.pop());
+                                        }
+                                    } else {
+                                        this.#add_connection(selection);
+                                    }
+                                });
                     }
                     ev.stopPropagation();
                     break;
 
                 case "Escape":
                     switch (this.#drag_state) {
-                        case led_controller_grid.#DRAG_NONE:
-                            if (this.#selection !== null) {
-                                this.#selection.element.classList.remove("selected");
-                                this.#selection = null;
-                            }
-                            break;
+                        case led_controller_grid.#DRAG_NONE: this.deselect(); break;
 
                         case led_controller_grid.#DRAG_BLOCK:
                             this.#drag_object.element.style.left = this.#drag_start[0];
@@ -254,10 +290,10 @@ class led_controller_grid {
                         case led_controller_grid.#DRAG_GRID      : this.#mouse_up(ev); break;
 
                         case led_controller_grid.#DRAG_NEW_BLOCK:
+                            this.deselect();
                             this.#drag_object.remove();
                             this.#drag_object = null;
                             this.#drag_state  = led_controller_grid.#DRAG_NONE;
-                            this.#selection   = null;
                             break;
                     }
                     ev.stopPropagation();
@@ -291,10 +327,7 @@ class led_controller_grid {
                 if (this.#drag_state !== led_controller_grid.#DRAG_NONE) {
                     this.#mouse_up(ev);
                 } else {
-                    if (this.#selection !== null) {
-                        this.#selection.element.classList.remove("selected");
-                        this.#selection = null;
-                    }
+                    this.deselect();
                     this.#drag_state = led_controller_grid.#DRAG_GRID;
                 }
                 ev.stopPropagation();
@@ -363,24 +396,54 @@ class led_controller_grid {
             switch (this.#drag_state) {
                 case led_controller_grid.#DRAG_NONE: return;
 
-                case led_controller_grid.#DRAG_BLOCK: break;
+                case led_controller_grid.#DRAG_BLOCK:
+                case led_controller_grid.#DRAG_NEW_BLOCK:
+                    /**
+                     * @type {led_controller_block}
+                     */
+                    const block = this.#drag_object;
+                    const redo  = [ block.element.style.left, block.element.style.top ];
+                    const undo  = this.#drag_start;
+                    if (this.#drag_state == led_controller_grid.#DRAG_BLOCK) {
+                        if (redo[0] !== undo[0] || redo[1] !== undo[1]) {
+                            led_controller_toolbar.instance.handle_action(
+                                    () => {
+                                        block.element.style.left = redo[0];
+                                        block.element.style.top  = redo[1];
+                                        block.update();
+                                    },
+                                    () => {
+                                        block.element.style.left = undo[0];
+                                        block.element.style.top  = undo[1];
+                                        block.update();
+                                    });
+                        }
+                    } else {
+                        led_controller_toolbar.instance.handle_action(
+                                () => {
+                                    if (block.element.parentElement === null) {
+                                        this.#add_block(block);
+                                    }
+                                },
+                                () => { block.remove(); });
+                    }
+                    break;
 
                 case led_controller_grid.#DRAG_CONNECTION:
                     if ((this.#drag_object.target instanceof MouseEvent)
                         || this.#drag_object.element.classList.contains("invalid")) {
                         this.#drag_object.element.remove();
                     } else {
-                        const net
-                                = led_controller_net.merge(this.#drag_object.origin.net, this.#drag_object.target.net);
-                        net.connections.push(this.#drag_object);
-                        this.#drag_object.origin.net = net;
-                        this.#drag_object.target.net = net;
+                        /**
+                         * @type {led_controller_connection}
+                         */
+                        const connection = this.#drag_object;
+                        led_controller_toolbar.instance.handle_action(() => { this.#add_connection(connection); },
+                                                                      () => { connection.remove(); });
                     }
                     break;
 
                 case led_controller_grid.#DRAG_GRID: break;
-
-                case led_controller_grid.#DRAG_NEW_BLOCK: break;
             }
             this.#drag_object = null;
             this.#drag_state  = led_controller_grid.#DRAG_NONE;

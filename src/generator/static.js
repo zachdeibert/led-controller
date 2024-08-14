@@ -6,21 +6,16 @@ led_controller_toolbar.register_block("Static Color", "generators", class extend
      */
     #color;
 
-    constructor() {
+    constructor(color = "#FFFFFF") {
         super("Static Color", 130, 70);
         this.add_connector(30, false);
-        this.#color = this.add_color_input("Color");
+        this.#color = this.add_color_input("Color", color);
     }
 
     /**
      * @returns {led_controller_block}
      */
     copy() {
-        /**
-         * @type {this}
-         */
-        const copy        = new (this.constructor)();
-        copy.#color.value = this.#color.value;
-        return copy;
+        return new (this.constructor)(this.#color.value);
     }
 });
