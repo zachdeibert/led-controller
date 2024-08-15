@@ -93,6 +93,7 @@ class led_controller_block {
 
             this.connectors = [];
 
+            this.#element.addEventListener("keydown", ev => { ev.stopPropagation(); });
             title_div.addEventListener("mousedown", ev => {
                 if (ev.button === 0) {
                     led_controller_grid.instance.drag_block(this);
