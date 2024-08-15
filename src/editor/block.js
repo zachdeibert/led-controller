@@ -269,22 +269,26 @@ class led_controller_block {
             let prev_value = value;
             input.addEventListener("input", () => {
                 const orig_value = input.value;
-                const new_value  = validate(orig_value);
                 const old_value  = prev_value;
-                if (new_value !== old_value) {
-                    led_controller_toolbar.instance.handle_action(
-                            () => {
-                                input.value = new_value;
-                                prev_value  = new_value;
-                                on_change(new_value);
-                            },
-                            () => {
-                                input.value = old_value;
-                                prev_value  = old_value;
-                                on_change(old_value);
-                            });
-                } else if (new_value !== orig_value) {
-                    input.value = new_value;
+                if (orig_value.length === 0 && !input.checkValidity()) {
+                    input.value = old_value;
+                } else {
+                    const new_value = validate(orig_value);
+                    if (new_value !== old_value) {
+                        led_controller_toolbar.instance.handle_action(
+                                () => {
+                                    input.value = new_value;
+                                    prev_value  = new_value;
+                                    on_change(new_value);
+                                },
+                                () => {
+                                    input.value = old_value;
+                                    prev_value  = old_value;
+                                    on_change(old_value);
+                                });
+                    } else if (new_value !== orig_value) {
+                        input.value = new_value;
+                    }
                 }
             });
 
