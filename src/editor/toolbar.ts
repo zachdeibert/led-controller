@@ -1,18 +1,10 @@
 import { M } from "@materializecss/materialize";
-import block from "./block";
+import block_factory from "./block_factory";
 import grid from "./grid";
 
 const UNDO_MAX = 100;
 
 export default class toolbar {
-    static #block_types = new Map<string, [string, new () => block][]>([
-        ["control-inputs", []],
-        ["generators", []],
-        ["led-outputs", []],
-        ["processing", []],
-        ["utilities", []],
-    ]);
-
     static instance: toolbar;
 
     #redo_stack: [() => void, () => void][];
@@ -40,19 +32,17 @@ export default class toolbar {
         });
         M.Tooltip.init(document.querySelectorAll(".tooltipped"));
 
-        toolbar.#block_types.forEach((blocks, k) => {
-            const editor_group = document.getElementById(`editor-group-${k}`) as HTMLDivElement;
-            blocks.forEach(block_type => {
-                const item = document.createElement("div");
-                item.classList.add("collapsible-item", "waves-effect");
-                item.innerText = block_type[0];
-                item.addEventListener("click", ev => {
-                    sidenav.close();
-                    grid.instance.add_block(new block_type[1]());
-                    ev.stopPropagation();
-                });
-                editor_group.appendChild(item);
+        block_factory.forEach(block => {
+            const editor_group = document.getElementById(`editor-group-${block.group}`) as HTMLDivElement;
+            const item = document.createElement("div");
+            item.classList.add("collapsible-item", "waves-effect");
+            item.innerText = block.title;
+            item.addEventListener("click", ev => {
+                sidenav.close();
+                grid.instance.add_block(new block());
+                ev.stopPropagation();
             });
+            editor_group.appendChild(item);
         });
 
         window.addEventListener("keydown", ev => {
@@ -66,14 +56,6 @@ export default class toolbar {
             this.#undo();
             ev.stopPropagation();
         });
-    }
-
-    static register_block(name: string, group: string, type: new () => block) {
-        if (toolbar.instance != null) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-            throw new TypeError("All block subclasses must be registered before the DOM loads");
-        } else if (this.#block_types.get(group)?.push([name, type]) == null) {
-            throw new TypeError(`Invalid group value "${group}"`);
-        }
     }
 
     handle_action(redo_action: () => void, undo_action: () => void) {

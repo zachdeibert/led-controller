@@ -1,0 +1,7 @@
+syntax = "proto3";
+package zachdeibert.led_controller.proto;
+
+message connection {
+    int32 from = 1;
+    int32 to   = 2;
+}

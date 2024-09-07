@@ -1,0 +1,6 @@
+syntax = "proto3";
+package zachdeibert.led_controller.proto.generator;
+
+message static_color {
+    fixed32 color = 1;
+}

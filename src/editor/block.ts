@@ -5,7 +5,7 @@ import connector from "./connector";
 import grid from "./grid";
 import toolbar from "./toolbar";
 
-export default abstract class block {
+export abstract class generic_block {
     static #color_field: HTMLInputElement;
     static #color_modal: Modal;
     static #color_picker: iro.ColorPicker;
@@ -16,8 +16,8 @@ export default abstract class block {
     readonly connectors: connector[];
     readonly element: HTMLDivElement;
 
-    get dependents(): block[] {
-        const dependents = new Set<block>();
+    get dependents(): generic_block[] {
+        const dependents = new Set<generic_block>();
         this.connectors.forEach(connr => {
             if (connr.output && connr.net !== null) {
                 connr.net.connections.forEach(conn => {
@@ -109,9 +109,9 @@ export default abstract class block {
         update_style(value);
 
         input.addEventListener("dblclick", ev => {
-            block.#color_field = input;
-            block.#color_picker.color.hexString = input.value.padEnd(7, "0");
-            block.#color_modal.open();
+            generic_block.#color_field = input;
+            generic_block.#color_picker.color.hexString = input.value.padEnd(7, "0");
+            generic_block.#color_modal.open();
             ev.stopPropagation();
         });
 
@@ -172,7 +172,7 @@ export default abstract class block {
         this.#form.appendChild(input_field);
 
         const input = document.createElement("input");
-        input.id = `dynamic-block-id-${++block.#nonce}`;
+        input.id = `dynamic-block-id-${++generic_block.#nonce}`;
         input.type = type;
         input.value = value;
         input_field.appendChild(input);
@@ -241,8 +241,6 @@ export default abstract class block {
         return input;
     }
 
-    abstract copy(): block;
-
     remove(): connection[] {
         const removed: connection[] = [];
         this.connectors.forEach(connr => {
@@ -271,4 +269,8 @@ export default abstract class block {
             }
         });
     }
+};
+
+export default abstract class block<T> extends generic_block { // eslint-disable-line @typescript-eslint/no-unnecessary-type-parameters
+    abstract save(): T;
 };

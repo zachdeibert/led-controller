@@ -1,4 +1,6 @@
-import block from "./block";
+import { Iblock } from "../proto";
+import block_factory from "./block_factory";
+import { generic_block } from "./block";
 import connection from "./connection";
 import connector from "./connector";
 import net from "./net";
@@ -13,22 +15,22 @@ enum drag_state {
 }
 
 export default class grid {
-    static MAJOR = 50;
-    static MINOR = 10;
+    static readonly MAJOR = 50;
+    static readonly MINOR = 10;
 
     static instance: grid;
 
-    #blocks: block[];
-    #clipboard: block | null;
+    #blocks: generic_block[];
+    #clipboard: Iblock;
     #container: HTMLDivElement;
-    #drag_object: block | connection | null;
+    #drag_object: generic_block | connection | null;
     #drag_start: [string, string];
     #drag_state: drag_state;
     #grid: HTMLDivElement;
     #offset: HTMLDivElement;
     #offset_x: number;
     #offset_y: number;
-    #selection: block | connection | null;
+    #selection: generic_block | connection | null;
 
     readonly element: HTMLDivElement;
 
@@ -45,7 +47,7 @@ export default class grid {
         this.#offset = document.getElementById("editor-offset") as HTMLDivElement;
 
         this.#blocks = [];
-        this.#clipboard = null;
+        this.#clipboard = {};
         this.#drag_object = null;
         this.#drag_start = ["", ""];
         this.#drag_state = drag_state.NONE;
@@ -70,13 +72,13 @@ export default class grid {
         });
     }
 
-    add_block(blk: block) {
+    add_block(blk: generic_block) {
         this.#add_block(blk);
         this.drag_block(blk);
         this.#drag_state = drag_state.NEW_BLOCK;
     }
 
-    remove_block(blk: block) {
+    remove_block(blk: generic_block) {
         this.#blocks.splice(this.#blocks.indexOf(blk), 1);
     }
 
@@ -87,7 +89,7 @@ export default class grid {
         }
     }
 
-    drag_block(blk: block) {
+    drag_block(blk: generic_block) {
         if (this.#drag_state !== drag_state.NEW_BLOCK) {
             this.deselect();
             blk.element.classList.add("selected");
@@ -136,7 +138,7 @@ export default class grid {
         }
     }
 
-    #add_block(blk: block) {
+    #add_block(blk: generic_block) {
         this.#blocks.push(blk);
         this.element.appendChild(blk.element);
     }
@@ -180,13 +182,13 @@ export default class grid {
                         this.deselect();
                         const connections: connection[] = [];
                         toolbar.instance.handle_action(() => {
-                            if (selection instanceof block) {
+                            if (selection instanceof generic_block) {
                                 connections.push(...selection.remove());
                             } else {
                                 selection.remove();
                             }
                         }, () => {
-                            if (selection instanceof block) {
+                            if (selection instanceof generic_block) {
                                 this.#add_block(selection);
                                 while (connections.length > 0) {
                                     this.#add_connection(connections.pop()!);
@@ -230,8 +232,8 @@ export default class grid {
 
             case "KeyC":
                 if (ev.ctrlKey && !ev.altKey && !ev.shiftKey) {
-                    if (this.#selection !== null && this.#selection instanceof block) {
-                        this.#clipboard = this.#selection.copy();
+                    if (this.#selection !== null && this.#selection instanceof generic_block) {
+                        this.#clipboard = block_factory.save(this.#selection);
                     }
                     ev.stopPropagation();
                 }
@@ -239,8 +241,9 @@ export default class grid {
 
             case "KeyV":
                 if (ev.ctrlKey && !ev.altKey && !ev.shiftKey) {
-                    if (this.#clipboard !== null) {
-                        this.add_block(this.#clipboard.copy());
+                    const blk = block_factory.load(this.#clipboard);
+                    if (blk !== undefined) {
+                        this.add_block(blk);
                     }
                     ev.stopPropagation();
                 }
@@ -322,7 +325,7 @@ export default class grid {
             case drag_state.BLOCK:
             case drag_state.NEW_BLOCK:
                 {
-                    const block = this.#drag_object as block;
+                    const block = this.#drag_object as generic_block;
                     const redo = [block.element.style.left, block.element.style.top];
                     const undo = this.#drag_start;
                     if (this.#drag_state === drag_state.BLOCK) {

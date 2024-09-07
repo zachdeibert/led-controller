@@ -1,2 +1,6 @@
 /_site/
 /node_modules/
+/src/proto-index.ts
+/src/proto.d.ts
+/src/proto.js
+/src/proto.json

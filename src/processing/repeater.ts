@@ -1,18 +1,25 @@
+import block_factory from "../editor/block_factory";
 import block from "../editor/block";
-import toolbar from "../editor/toolbar";
+import { processing } from "../proto";
 
-toolbar.register_block("Repeater", "processing", class repeater extends block {
+block_factory.register(class repeater extends block<processing.Irepeater> {
+    static readonly group = "processing";
+    static readonly proto = "processing_repeater";
+    static readonly title = "Repeater";
+
     #factor: HTMLInputElement;
 
-    constructor(factor = 1) {
+    constructor(data?: processing.Irepeater) {
         super("Repeater", 100, 70);
         this.add_connector(30, true);
         this.add_connector(30, false);
-        this.#factor = this.add_text_input("number", "Factor", factor.toString());
+        this.#factor = this.add_text_input("number", "Factor", (data?.factor ?? 1).toString());
         this.#factor.min = "1";
     }
 
-    copy(): block {
-        return new repeater(parseInt(this.#factor.value));
+    save(): processing.Irepeater {
+        return {
+            "factor": parseInt(this.#factor.value),
+        };
     }
 });

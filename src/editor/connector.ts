@@ -1,9 +1,9 @@
-import block from "./block";
+import { generic_block } from "./block";
 import grid from "./grid";
 import net from "./net";
 
 export default class connector {
-    readonly block: block;
+    readonly block: generic_block;
     readonly element: HTMLDivElement;
     readonly input: boolean;
     net: net | null;
@@ -12,7 +12,7 @@ export default class connector {
         return !this.input;
     }
 
-    constructor(block: block, y: number, input: boolean) {
+    constructor(block: generic_block, y: number, input: boolean) {
         this.element = document.createElement("div");
         this.element.classList.add("block-connector", input ? "block-connector-input" : "block-connector-output");
         this.element.style.top = `${y}px`;

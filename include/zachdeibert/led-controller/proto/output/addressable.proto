@@ -1,0 +1,14 @@
+syntax = "proto3";
+package zachdeibert.led_controller.proto.output;
+
+message addressable {
+    enum flag {
+        FLAG_NONE        = 0;
+        FLAG_800KHZ      = 1;
+        FLAG_ACTIVE_HIGH = 2;
+    }
+
+    int32 pin    = 1;
+    string order = 2;
+    int32 flags  = 3;
+}

@@ -1,0 +1,19 @@
+syntax = "proto3";
+package zachdeibert.led_controller.proto;
+
+import "zachdeibert/led-controller/proto/generator/static_color.proto";
+import "zachdeibert/led-controller/proto/output/addressable.proto";
+import "zachdeibert/led-controller/proto/processing/repeater.proto";
+
+message block {
+    sint32 x                  = 1;
+    sint32 y                  = 2;
+    repeated int32 connectors = 3;
+    // field numbers [4, 16) are reserved for future non-implementation-specific data
+
+    oneof implementation {
+        generator.static_color generator_static = 16;
+        output.addressable output_addressable   = 17;
+        processing.repeater processing_repeater = 18;
+    }
+}

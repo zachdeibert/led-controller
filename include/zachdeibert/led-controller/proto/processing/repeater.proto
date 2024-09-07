@@ -1,0 +1,6 @@
+syntax = "proto3";
+package zachdeibert.led_controller.proto.processing;
+
+message repeater {
+    int32 factor = 1;
+}

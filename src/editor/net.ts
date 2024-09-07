@@ -1,4 +1,4 @@
-import block from "./block";
+import { generic_block } from "./block";
 import connection from "./connection";
 import connector from "./connector";
 import { check, node } from "./dag";
@@ -71,8 +71,8 @@ export default class net {
         (conn.target as connector).net = target_net.connections.length > 0 ? target_net : null;
     }
 
-    static remains_dag(blocks: block[], new_connection: connection): boolean {
-        const block_to_node = new Map<block, node>();
+    static remains_dag(blocks: generic_block[], new_connection: connection): boolean {
+        const block_to_node = new Map<generic_block, node>();
         blocks.forEach(blk => {
             block_to_node.set(blk, new node());
         });
@@ -82,8 +82,8 @@ export default class net {
                 parent?.edge_to(block_to_node.get(dependent)!);
             });
         });
-        let source: block | null = null;
-        let sink: block | null = null;
+        let source: generic_block | null = null;
+        let sink: generic_block | null = null;
         if (new_connection.origin.output) {
             source = new_connection.origin.block;
         } else {

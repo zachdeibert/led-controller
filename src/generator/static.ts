@@ -1,16 +1,23 @@
+import block_factory from "../editor/block_factory";
 import block from "../editor/block";
-import toolbar from "../editor/toolbar";
+import { generator } from "../proto";
 
-toolbar.register_block("Static Color", "generators", class static_color extends block {
+block_factory.register(class static_color extends block<generator.Istatic_color> {
+    static readonly group = "generators";
+    static readonly proto = "generator_static";
+    static readonly title = "Static Color";
+
     #color: HTMLInputElement;
 
-    constructor(color = "#FFFFFF") {
+    constructor(data?: generator.Istatic_color) {
         super("Static Color", 130, 70);
         this.add_connector(30, false);
-        this.#color = this.add_color_input("Color", color);
+        this.#color = this.add_color_input("Color", data?.color != null ? `#${data.color.toString(16).toUpperCase().padStart(6, "0")}` : "#FFFFFF");
     }
 
-    copy(): block {
-        return new static_color(this.#color.value);
+    save(): generator.Istatic_color {
+        return {
+            "color": parseInt(this.#color.value.substring(1).padEnd(6, "0"), 16),
+        };
     }
 });

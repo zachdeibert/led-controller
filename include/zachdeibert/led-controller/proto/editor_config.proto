@@ -1,0 +1,8 @@
+syntax = "proto3";
+package zachdeibert.led_controller.proto;
+
+import "zachdeibert/led-controller/proto/device_config.proto";
+
+message editor_config {
+    device_config device = 1;
+}

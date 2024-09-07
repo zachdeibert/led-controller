@@ -1,6 +1,10 @@
 syntax = "proto3";
 package zachdeibert.led_controller.proto;
 
+import "zachdeibert/led-controller/proto/block.proto";
+import "zachdeibert/led-controller/proto/connection.proto";
+
 message device_config {
-    uint32 test = 1;
+    repeated block blocks           = 1;
+    repeated connection connections = 2;
 }
