@@ -38,7 +38,7 @@
     },
     "scripts": {
         "build": "npm run protoc && webpack",
-        "lint": "eslint",
+        "lint": "npm run protoc && eslint",
         "protoc": "node src/protoc.js",
         "serve": "npm run protoc && webpack serve"
     },
